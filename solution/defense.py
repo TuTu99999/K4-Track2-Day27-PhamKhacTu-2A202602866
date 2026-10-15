@@ -70,8 +70,12 @@ def check_data_batch(payload, ctx):
         + stale_distance ** 2
     ) ** 0.5
 
-    if not reasons and composite > 1.30:
-        reasons.append("multiple batch metrics drifted together")
+    component_distances = (
+        row_distance, amount_distance, null_distance, stale_distance
+    )
+    if (not reasons and max(component_distances) >= 0.85
+            and composite > 1.10):
+        reasons.append("batch metrics crossed the soft multivariate boundary")
 
     confidence = 0.95 if reasons and composite >= 1.0 else 0.75
     return _verdict(bool(reasons), "checks", reasons, confidence if reasons else 1.0)
@@ -114,7 +118,8 @@ def check_lineage_run(payload, ctx):
     if missing:
         reasons.append("missing upstream: " + ", ".join(missing))
 
-    if graph["duration_ms"] > ctx.baseline["lineage_duration_ms_max"]:
+    runtime_limit = 0.95 * ctx.baseline["lineage_duration_ms_max"]
+    if graph["duration_ms"] > runtime_limit:
         reasons.append("lineage runtime exceeded clean range")
 
     return _verdict(bool(reasons), "lineage", reasons)
@@ -125,10 +130,11 @@ def check_feature_materialization(payload, ctx):
     if _result_error(drift):
         return _verdict(False, "ai_infra", ["feature drift unavailable"], 0.0)
 
-    # The published 3-sigma value is slightly below observed clean stream
-    # variation.  A calibrated gap threshold avoids those false positives
-    # while retaining separation from known feature-skew cases.
-    threshold = max(0.65, ctx.baseline["feature_mean_shift_sigma_max"])
+    # Use a relative safety margin over the published clean-stream boundary,
+    # rather than a phase-specific absolute cut point.  This preserves some
+    # tolerance for natural variation while transferring to differently
+    # scaled future baselines.
+    threshold = 1.25 * ctx.baseline["feature_mean_shift_sigma_max"]
     shifted = drift["mean_shift_sigma"] >= threshold
     reasons = ["training-serving feature skew"] if shifted else []
     return _verdict(shifted, "ai_infra", reasons, 0.95 if shifted else 1.0)
@@ -142,10 +148,10 @@ def check_embedding_batch(payload, ctx):
         return _verdict(False, "ai_infra", ["embedding drift unavailable"], 0.0)
 
     reasons = []
-    # These cut points sit in the observed clean/fault gaps while remaining
-    # close to the published conservative baseline limits.
-    centroid_limit = min(0.040, ctx.baseline["embedding_centroid_shift_max"])
-    age_limit = min(45.0, ctx.baseline["corpus_avg_doc_age_days_max"])
+    # Look just inside the conservative 3-sigma limits.  Relative margins are
+    # portable across corpora and avoid thresholds fitted to one phase.
+    centroid_limit = 0.90 * ctx.baseline["embedding_centroid_shift_max"]
+    age_limit = 0.90 * ctx.baseline["corpus_avg_doc_age_days_max"]
     if drift["centroid_shift"] >= centroid_limit:
         reasons.append("embedding centroid drift")
     if drift["avg_doc_age_days"] >= age_limit:

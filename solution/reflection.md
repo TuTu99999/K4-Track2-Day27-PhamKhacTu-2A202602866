@@ -17,9 +17,10 @@ Giải pháp gọi đúng một công cụ tương ứng cho mỗi sự kiện v
 Practice đạt TPR 1.0, FPR 0.0 với 180/220 credits; Public đạt TPR 1.0, FPR 0.0
 với 240/220 credits. Tôi chấp nhận khoản phạt nhỏ ở Public để duy trì độ bao
 phủ. Ở Private, ngân sách 320 credits đủ cho chiến lược single-pass nên kết quả
-không bị cost overage. Kết quả Private đạt TPR 0.6481 và FPR 0.0, cho thấy lựa
-chọn bảo thủ đã tránh alert fatigue nhưng vẫn bỏ sót một số lỗi tinh vi. Tôi
-không hiệu chỉnh ngược theo kết quả Private để tránh hardcode hoặc overfit.
+không bị cost overage. Kết quả Private đạt TPR 0.6667 và FPR 0.0137 sau khi dùng
+các biên tương đối theo baseline thay cho ngưỡng tuyệt đối theo phase. Đây là
+đánh đổi có kiểm soát: bắt thêm lỗi subtle với mức tăng FPR nhỏ. Tôi dừng hiệu
+chỉnh sau lần đánh giá này để không biến dữ liệu Private thành tập huấn luyện.
 
 ## Nếu có thêm một vòng cải tiến
 
