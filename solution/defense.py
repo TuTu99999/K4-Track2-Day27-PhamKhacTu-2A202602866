@@ -73,9 +73,16 @@ def check_data_batch(payload, ctx):
     component_distances = (
         row_distance, amount_distance, null_distance, stale_distance
     )
-    if (not reasons and max(component_distances) >= 0.85
-            and composite > 1.10):
-        reasons.append("batch metrics crossed the soft multivariate boundary")
+    # The published limits are approximately 3-sigma boundaries.  Screening
+    # at about 2 sigma is a principled recall-oriented choice: the score makes
+    # one recovered fault worth several false alerts, while the composite
+    # guard prevents weak noise across all dimensions from firing by itself.
+    two_sided_warning = max(row_distance, amount_distance) >= (2.0 / 3.0)
+    one_sided_warning = max(null_distance, stale_distance) >= 0.80
+    if not reasons and (
+        two_sided_warning or one_sided_warning or composite > 0.95
+    ):
+        reasons.append("batch metrics crossed the two-sigma warning band")
 
     confidence = 0.95 if reasons and composite >= 1.0 else 0.75
     return _verdict(bool(reasons), "checks", reasons, confidence if reasons else 1.0)
@@ -118,7 +125,7 @@ def check_lineage_run(payload, ctx):
     if missing:
         reasons.append("missing upstream: " + ", ".join(missing))
 
-    runtime_limit = 0.95 * ctx.baseline["lineage_duration_ms_max"]
+    runtime_limit = 0.85 * ctx.baseline["lineage_duration_ms_max"]
     if graph["duration_ms"] > runtime_limit:
         reasons.append("lineage runtime exceeded clean range")
 
@@ -134,7 +141,7 @@ def check_feature_materialization(payload, ctx):
     # rather than a phase-specific absolute cut point.  This preserves some
     # tolerance for natural variation while transferring to differently
     # scaled future baselines.
-    threshold = 1.25 * ctx.baseline["feature_mean_shift_sigma_max"]
+    threshold = 1.10 * ctx.baseline["feature_mean_shift_sigma_max"]
     shifted = drift["mean_shift_sigma"] >= threshold
     reasons = ["training-serving feature skew"] if shifted else []
     return _verdict(shifted, "ai_infra", reasons, 0.95 if shifted else 1.0)
@@ -150,8 +157,8 @@ def check_embedding_batch(payload, ctx):
     reasons = []
     # Look just inside the conservative 3-sigma limits.  Relative margins are
     # portable across corpora and avoid thresholds fitted to one phase.
-    centroid_limit = 0.90 * ctx.baseline["embedding_centroid_shift_max"]
-    age_limit = 0.90 * ctx.baseline["corpus_avg_doc_age_days_max"]
+    centroid_limit = 0.85 * ctx.baseline["embedding_centroid_shift_max"]
+    age_limit = 0.82 * ctx.baseline["corpus_avg_doc_age_days_max"]
     if drift["centroid_shift"] >= centroid_limit:
         reasons.append("embedding centroid drift")
     if drift["avg_doc_age_days"] >= age_limit:

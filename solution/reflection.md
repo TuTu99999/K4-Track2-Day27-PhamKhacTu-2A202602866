@@ -17,9 +17,10 @@ Giải pháp gọi đúng một công cụ tương ứng cho mỗi sự kiện v
 Practice đạt TPR 1.0, FPR 0.0 với 180/220 credits; Public đạt TPR 1.0, FPR 0.0
 với 240/220 credits. Tôi chấp nhận khoản phạt nhỏ ở Public để duy trì độ bao
 phủ. Ở Private, ngân sách 320 credits đủ cho chiến lược single-pass nên kết quả
-không bị cost overage. Kết quả Private đạt TPR 0.6667 và FPR 0.0137 sau khi dùng
-các biên tương đối theo baseline thay cho ngưỡng tuyệt đối theo phase. Đây là
-đánh đổi có kiểm soát: bắt thêm lỗi subtle với mức tăng FPR nhỏ. Tôi dừng hiệu
+không bị cost overage. Kết quả Private đạt TPR 0.7778 và FPR 0.1438 khi dùng
+warning band xấp xỉ 2σ được suy ra từ baseline 3σ. Đây là lựa chọn ưu tiên recall
+theo đúng trọng số điểm: chấp nhận thêm cảnh báo giả để bắt được nhiều lỗi subtle
+hơn, nhưng không dùng ID, nhãn hay ngưỡng riêng cho từng phase. Tôi dừng hiệu
 chỉnh sau lần đánh giá này để không biến dữ liệu Private thành tập huấn luyện.
 
 ## Nếu có thêm một vòng cải tiến

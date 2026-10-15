@@ -3,11 +3,11 @@
     "n_faulty": 33,
     "n_clean": 87,
     "tpr": 1.0,
-    "fpr": 0.0,
+    "fpr": 0.092,
     "cost_ledger": 180.0,
     "budget": 220.0,
     "cost_overage": 0.0,
-    "score": 50.0,
+    "score": 47.24,
     "phase": "practice",
     "defense_file": "solution\\defense.py",
     "per_pillar_band": {
@@ -160,7 +160,7 @@
       },
       {
         "seq": 35,
-        "alert": false
+        "alert": true
       },
       {
         "seq": 36,
@@ -168,7 +168,7 @@
       },
       {
         "seq": 37,
-        "alert": false
+        "alert": true
       },
       {
         "seq": 38,
@@ -248,7 +248,7 @@
       },
       {
         "seq": 57,
-        "alert": false
+        "alert": true
       },
       {
         "seq": 58,
@@ -256,7 +256,7 @@
       },
       {
         "seq": 59,
-        "alert": false
+        "alert": true
       },
       {
         "seq": 60,
@@ -320,7 +320,7 @@
       },
       {
         "seq": 75,
-        "alert": false
+        "alert": true
       },
       {
         "seq": 76,
@@ -356,7 +356,7 @@
       },
       {
         "seq": 84,
-        "alert": false
+        "alert": true
       },
       {
         "seq": 85,
@@ -400,7 +400,7 @@
       },
       {
         "seq": 95,
-        "alert": false
+        "alert": true
       },
       {
         "seq": 96,
@@ -460,7 +460,7 @@
       },
       {
         "seq": 110,
-        "alert": false
+        "alert": true
       },
       {
         "seq": 111,
@@ -500,5 +500,5 @@
       }
     ]
   },
-  "signature": "ca7ea76d6c9f5080d6ad0db215e20fd20dc2c1bc74a3988c6760afe510010481"
+  "signature": "ee15c6598e833b8eb0f59acb077174cc261f3d49473e4afca27fbe9e75e7b9a9"
 }
